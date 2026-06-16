@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>荆州区GDP动态图表 | 2003-2025</title>
+    <!-- ECharts CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(145deg, #eef2f5 0%, #e0e8ef 100%);
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans', 'Helvetica Neue', sans-serif;
+            padding: 2rem 1.5rem;
+            color: #1a2c3e;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        .glass-dashboard {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(2px);
+            border-radius: 2rem;
+            box-shadow: 0 25px 45px -12px rgba(0, 0, 0, 0.2), 0 4px 12px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .dashboard-inner {
+            padding: 1.8rem 2rem 2rem 2rem;
+        }
+
+        .hero-section {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 2rem;
+            gap: 1.5rem;
+        }
+
+        .title-block h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ac1e3a, #c72a48, #8b1e2e);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            letter-spacing: -0.3px;
+            margin-bottom: 0.4rem;
+        }
+
+        .title-block .subhead {
+            color: #4f6f8f;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+            font-size: 0.9rem;
+        }
+
+        .stats-grid {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 0.8rem 1.4rem;
+            min-width: 140px;
+            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.03), 0 1px 2px rgba(0, 0, 0, 0.05);
+            transition: all 0.2s ease;
+            border: 1px solid rgba(199, 42, 72, 0.15);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 18px 28px -10px rgba(0, 0, 0, 0.12);
+            border-color: rgba(199, 42, 72, 0.3);
+        }
+
+        .stat-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            color: #c72a48;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #1e3b4c;
+            line-height: 1.2;
+        }
+
+        .stat-unit {
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #5f7d9a;
+        }
+
+        .trend-up {
+            color: #2a7f4b;
+            font-weight: 600;
+        }
+
+        .trend-down {
+            color: #c72a48;
+            font-weight: 600;
+        }
+
+        .chart-toolbar {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 1.2rem;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .toggle-group {
+            display: flex;
+            gap: 0.5rem;
+            background: #f0f4f9;
+            padding: 0.3rem;
+            border-radius: 60px;
+        }
+
+        .chart-switch {
+            border: none;
+            background: transparent;
+            padding: 0.5rem 1.4rem;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: 0.2s;
+            color: #3a627d;
+        }
+
+        .chart-switch.active {
+            background: #c72a48;
+            color: white;
+            box-shadow: 0 4px 8px rgba(199, 42, 72, 0.3);
+        }
+
+        .chart-switch:hover:not(.active) {
+            background: #e2e8f0;
+            transform: scale(0.96);
+        }
+
+        .chart-container {
+            width: 100%;
+            height: 540px;
+            background: #fefefe;
+            border-radius: 1.6rem;
+            padding: 0.6rem;
+            box-shadow: inset 0 0 0 1px rgba(0,0,0,0.02), 0 6px 14px rgba(0,0,0,0.05);
+            margin-bottom: 1rem;
+        }
+
+        .footer-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-top: 1.2rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(0, 0, 0, 0.08);
+            font-size: 0.7rem;
+            color: #5e7a97;
+        }
+
+        @media (max-width: 780px) {
+            body {
+                padding: 1rem;
+            }
+            .dashboard-inner {
+                padding: 1.2rem;
+            }
+            .stat-value {
+                font-size: 1.4rem;
+            }
+            .chart-container {
+                height: 420px;
+            }
+            .title-block h1 {
+                font-size: 1.6rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="glass-dashboard">
+    <div class="dashboard-inner">
+        <div class="hero-section">
+            <div class="title-block">
+                <h1>🏛️ 荆州区 · 经济跃迁图谱</h1>
+                <div class="subhead">
+                    <span>GDP总量 (亿元) | 2003 → 2025</span>
+                </div>
+            </div>
+            <div class="stats-grid" id="statsGrid"></div>
+        </div>
+
+        <div class="chart-toolbar">
+            <div class="toggle-group">
+                <button id="lineBtn" class="chart-switch active">📈 折线图 · 趋势面积</button>
+                <button id="barBtn" class="chart-switch">📊 柱状图对比</button>
+            </div>
+        </div>
+
+        <div id="gdpChart" class="chart-container"></div>
+
+        <div class="footer-meta">
+            <div>📌 数据来源：荆州区统计局历年公报 · 中经数据佐证 · 2025年经济运行通报</div>
+            <!-- 已移除“统计口径”行 -->
+        </div>
+    </div>
+</div>
+
+<script>
+    // --------------------------------------------------------------
+    // 完整数据集 (含年度原因及来源)
+    // --------------------------------------------------------------
+    const gdpTimeSeries = [
+        { year: 2003, gdp: 31.05, reason: "建区后统计体系完善，经济稳步起步", source: "荆州区统计局、中经数据" },
+        { year: 2004, gdp: 35.52, reason: "商贸、农业基础产业稳步发展", source: "荆州区统计局、中经数据" },
+        { year: 2005, gdp: 40.98, reason: "基础设施建设提速，三产逐步壮大", source: "荆州区统计局、中经数据" },
+        { year: 2006, gdp: 45.49, reason: "传统产业提质，经济平稳增长", source: "荆州区统计局、中经数据" },
+        { year: 2007, gdp: 53.12, reason: "全域经济活力提升，增速加快", source: "荆州区统计局、中经数据" },
+        { year: 2008, gdp: 75.40, reason: "工业项目落地，经济大幅提升", source: "荆州区统计局、中经数据" },
+        { year: 2009, gdp: 100.13, reason: "政策扶持对冲外部影响，总量破百亿", source: "荆州区统计局、中经数据" },
+        { year: 2010, gdp: 125.01, reason: "招商引资见效，产业规模持续扩张", source: "荆州区统计局、中经数据" },
+        { year: 2011, gdp: 152.62, reason: "城镇化推进，消费与投资双增长", source: "荆州区统计局、中经数据" },
+        { year: 2012, gdp: 176.95, reason: "文旅、现代服务业逐步发力", source: "荆州区统计局、中经数据" },
+        { year: 2013, gdp: 195.48, reason: "产业结构优化，增长节奏放缓", source: "荆州区统计局、中经数据" },
+        { year: 2014, gdp: 216.72, reason: "实体经济稳健运行，小幅增长", source: "荆州区统计局、中经数据" },
+        { year: 2015, gdp: 226.99, reason: "经济进入转型调整期，增速放缓", source: "荆州区统计局、中经数据" },
+        { year: 2016, gdp: 243.65, reason: "新旧产业接续，保持温和上涨", source: "荆州区统计局、中经数据" },
+        { year: 2017, gdp: 270.28, reason: "园区经济提速，增长再度加快", source: "荆州区统计局、中经数据" },
+        { year: 2018, gdp: 280.44, reason: "转型深化，增长节奏趋稳", source: "荆州区统计局、中经数据" },
+        { year: 2019, gdp: 350.05, reason: "重大项目集中投产，GDP大幅跃升", source: "荆州区统计局、中经数据" },
+        { year: 2020, gdp: 341.21, reason: "疫情冲击，全年GDP小幅回落", source: "荆州区2020年统计公报" },
+        { year: 2021, gdp: 385.09, reason: "疫后经济全面复苏，反弹力度强劲", source: "荆州区2021年统计公报" },
+        { year: 2022, gdp: 412.13, reason: "防疫与发展统筹，保持稳步增长", source: "荆州区2022年统计公报" },
+        { year: 2023, gdp: 446.67, reason: "市场全面回暖，产业协同发展", source: "荆州区2023年统计公报" },
+        { year: 2024, gdp: 453.52, reason: "产业结构调整，增速有所放缓", source: "荆州区2024年统计公报" },
+        { year: 2025, gdp: 480.10, reason: "文旅、现代服务业拉动，重回较快增长", source: "荆州区2025年经济运行通报" }
+    ];
+
+    const years = gdpTimeSeries.map(d => d.year);
+    const gdpValues = gdpTimeSeries.map(d => d.gdp);
+
+    // 计算核心指标
+    const firstGDP = gdpValues[0];
+    const latestGDP = gdpValues[gdpValues.length - 1];
+    const totalGrowthVal = latestGDP - firstGDP;
+    const totalGrowthRate = ((latestGDP - firstGDP) / firstGDP * 100).toFixed(1);
+    const yearSpan = years.length - 1;
+    const cagr = (Math.pow(latestGDP / firstGDP, 1 / yearSpan) - 1) * 100;
+    const cagrFormatted = cagr.toFixed(2);
+    const prevGDP = gdpValues[gdpValues.length - 2];
+    const yoyChange = ((latestGDP - prevGDP) / prevGDP * 100).toFixed(1);
+    const yoyDirection = yoyChange >= 0 ? '↑' : '↓';
+    const yoyColor = yoyChange >= 0 ? 'trend-up' : 'trend-down';
+    const maxGDP = Math.max(...gdpValues);
+    const minGDP = Math.min(...gdpValues);
+    const maxYear = years[gdpValues.indexOf(maxGDP)];
+    const minYear = years[gdpValues.indexOf(minGDP)];
+
+    function renderStatsCards() {
+        const container = document.getElementById('statsGrid');
+        container.innerHTML = `
+            <div class="stat-card">
+                <div class="stat-label">📅 2025年 GDP</div>
+                <div class="stat-value">${latestGDP.toFixed(1)} <span class="stat-unit">亿元</span></div>
+                <div class="${yoyColor}">同比 ${yoyDirection} ${Math.abs(yoyChange)}%</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">🚀 2003→2025 总增长</div>
+                <div class="stat-value">+${totalGrowthRate}%</div>
+                <div class="stat-unit">增量 ${totalGrowthVal.toFixed(1)} 亿元</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">📈 年均复合增长率 (CAGR)</div>
+                <div class="stat-value">${cagrFormatted}%</div>
+                <div class="stat-unit">跨越 ${yearSpan} 年</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">🏆 峰值 / 谷值</div>
+                <div class="stat-value">${maxGDP.toFixed(1)}<span class="stat-unit">亿</span> / ${minGDP.toFixed(1)}<span class="stat-unit">亿</span></div>
+                <div class="stat-unit">${maxYear}年最高 · ${minYear}年起步</div>
+            </div>
+        `;
+    }
+
+    // 增强tooltip展示同比、原因
+    function buildTooltip() {
+        return function(params) {
+            if (!params || params.length === 0) return '';
+            const idx = params[0].dataIndex;
+            const item = gdpTimeSeries[idx];
+            let changeHtml = '';
+            if (idx > 0) {
+                const prevVal = gdpValues[idx-1];
+                const diff = item.gdp - prevVal;
+                const diffRate = (diff / prevVal * 100).toFixed(1);
+                const arrow = diff >= 0 ? '▲' : '▼';
+                const colorDiff = diff >= 0 ? '#2a7f4b' : '#c72a48';
+                changeHtml = `<div style="margin-top: 6px;">同比上年: <span style="color:${colorDiff};font-weight:bold;">${arrow} ${Math.abs(diff).toFixed(2)} 亿元 (${arrow} ${Math.abs(diffRate)}%)</span></div>`;
+            } else {
+                changeHtml = `<div style="margin-top: 6px;">🏁 基期年份 · 经济起步</div>`;
+            }
+            return `
+                <div style="font-weight: 800; font-size: 1rem; border-left: 3px solid #c72a48; padding-left: 8px; margin-bottom: 8px;">
+                    ${item.year} 年 · 荆州区GDP
+                </div>
+                <div style="font-size: 1.6rem; font-weight: 800; color: #ac1e3a;">${item.gdp.toFixed(2)} <span style="font-size:0.9rem;">亿元</span></div>
+                ${changeHtml}
+                <div style="background: #f8f2f0; padding: 5px 8px; border-radius: 12px; margin-top: 8px;">
+                    <div style="font-size:0.75rem; font-weight:600;">📌 关键驱动:</div>
+                    <div style="font-size:0.75rem; color:#2c3e50;">${item.reason}</div>
+                    <div style="font-size:0.65rem; color:#6f8faa; margin-top: 5px;">📖 来源: ${item.source}</div>
+                </div>
+            `;
+        };
+    }
+
+    // 生成标注点 (峰值、谷值、特殊年份)
+    function generateMarkPoints() {
+        const marks = [];
+        const maxIdx = gdpValues.indexOf(maxGDP);
+        marks.push({
+            coord: [years[maxIdx], maxGDP],
+            name: '历史峰值',
+            label: { formatter: `🏆 ${maxGDP.toFixed(1)}亿`, fontSize: 10, fontWeight: 'bold', color: '#fff', backgroundColor: '#c72a48', padding: [2,6,2,6], borderRadius: 12 },
+            symbol: 'circle',
+            symbolSize: 48,
+            itemStyle: { color: '#ff6b6b', borderColor: '#fff', borderWidth: 2 }
+        });
+        const minIdx = gdpValues.indexOf(minGDP);
+        if (minIdx !== maxIdx) {
+            marks.push({
+                coord: [years[minIdx], minGDP],
+                name: '起步基值',
+                label: { formatter: `📌 起步 ${minGDP.toFixed(1)}亿`, fontSize: 10, backgroundColor: '#3f7e9c', padding: [2,6,2,6], borderRadius: 12, color: '#fff' },
+                symbol: 'circle',
+                symbolSize: 40,
+                itemStyle: { color: '#f39c6d' }
+            });
+        }
+        const idx2020 = years.indexOf(2020);
+        if (idx2020 !== -1) {
+            marks.push({
+                coord: [2020, gdpValues[idx2020]],
+                name: '疫情回调',
+                label: { formatter: `🔄 疫情 ${gdpValues[idx2020].toFixed(1)}亿`, fontSize: 9, backgroundColor: '#b56357', padding: [2,5,2,5], borderRadius: 10, color: '#fff' },
+                symbol: 'circle',
+                symbolSize: 36,
+                itemStyle: { color: '#d97756' }
+            });
+        }
+        const idx2025 = years.indexOf(2025);
+        if (idx2025 !== -1) {
+            marks.push({
+                coord: [2025, gdpValues[idx2025]],
+                name: '最新跃升',
+                label: { formatter: `✨ ${gdpValues[idx2025].toFixed(1)}亿 新台阶`, fontSize: 10, backgroundColor: '#c72a48', padding: [2,8,2,8], borderRadius: 16, color: '#fff', fontWeight: 'bold' },
+                symbol: 'pin',
+                symbolSize: 42,
+                itemStyle: { color: '#e84342' }
+            });
+        }
+        return marks;
+    }
+
+    // 基础配置 (无 dataZoom slider，只有 inside，且无动画)
+    function getBaseOption() {
+        return {
+            backgroundColor: 'transparent',
+            tooltip: {
+                trigger: 'axis',
+                axisPointer: { type: 'shadow', shadowStyle: { color: 'rgba(199,42,72,0.08)' } },
+                backgroundColor: 'rgba(255, 255, 248, 0.98)',
+                borderColor: '#e1a6b0',
+                borderWidth: 1,
+                borderRadius: 20,
+                textStyle: { fontFamily: 'Inter, sans-serif', fontSize: 12 },
+                formatter: buildTooltip(),
+                extraCssText: 'box-shadow: 0 12px 24px -8px rgba(0,0,0,0.12);'
+            },
+            grid: {
+                left: '6%',
+                right: '6%',
+                bottom: '8%',
+                top: '12%',
+                containLabel: true,
+                backgroundColor: '#fefcf9',
+                borderWidth: 0
+            },
+            xAxis: {
+                type: 'category',
+                data: years,
+                axisLine: { lineStyle: { color: '#bcab9a', width: 1.5 } },
+                axisTick: { show: false },
+                axisLabel: {
+                    rotate: 35,
+                    interval: 2,
+                    fontWeight: 500,
+                    fontSize: 11,
+                    color: '#4d6a86',
+                    margin: 12,
+                },
+                name: '年份',
+                nameLocation: 'middle',
+                nameGap: 40,
+                nameTextStyle: { fontWeight: 600, fontSize: 12, color: '#b3475e' }
+            },
+            yAxis: {
+                type: 'value',
+                name: 'GDP (亿元)',
+                nameTextStyle: { fontWeight: 600, fontSize: 12, color: '#b3475e' },
+                splitLine: { lineStyle: { color: '#e7e1d8', type: 'dashed', width: 0.8 } },
+                axisLabel: { fontSize: 11, fontWeight: 500, color: '#4d6a86', formatter: '{value} 亿' },
+                axisLine: { show: false },
+                min: 0,
+                max: 520,
+            },
+            // 只保留内部缩放，不显示底部轴
+            dataZoom: [
+                {
+                    type: 'inside',
+                    start: 0,
+                    end: 100,
+                    zoomOnMouseWheel: true,
+                    moveOnMouseMove: true
+                }
+            ],
+            toolbox: {
+                show: true,
+                feature: {
+                    saveAsImage: { title: '保存图表', backgroundColor: '#ffffff', iconStyle: { borderColor: '#c72a48' } },
+                    restore: { title: '重置缩放' }
+                },
+                right: 20,
+                top: 0,
+                iconStyle: { borderColor: '#bb7a6e' }
+            }
+        };
+    }
+
+    // 根据图表类型获取系列配置 (动画全部禁用)
+    function getSeriesByType(type) {
+        const isLine = type === 'line';
+        const series = {
+            name: 'GDP (亿元)',
+            type: isLine ? 'line' : 'bar',
+            data: gdpValues,
+            smooth: isLine ? true : false,
+            symbol: 'circle',
+            symbolSize: 7,
+            emphasis: { focus: 'series' },
+            markPoint: { data: generateMarkPoints(), symbolSize: 50, label: { show: true, fontSize: 9, offset: [0, -12] } },
+            animation: false
+        };
+        if (isLine) {
+            series.lineStyle = { width: 3.5, color: '#c72a48', shadowBlur: 12, shadowColor: '#c72a4860', cap: 'round' };
+            series.areaStyle = {
+                color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                    { offset: 0, color: 'rgba(199, 42, 72, 0.28)' },
+                    { offset: 0.7, color: 'rgba(199, 42, 72, 0.05)' }
+                ])
+            };
+            series.itemStyle = { color: '#f4bc7c', borderColor: '#c72a48', borderWidth: 1.5 };
+        } else {
+            series.itemStyle = {
+                borderRadius: [8, 8, 0, 0],
+                color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                    { offset: 0, color: '#e05a6f' },
+                    { offset: 1, color: '#b53148' }
+                ]),
+                shadowBlur: 8,
+                shadowColor: 'rgba(180, 60, 70, 0.3)'
+            };
+            series.barWidth = '55%';
+            series.label = { show: false };
+        }
+        return series;
+    }
+
+    let chart = null;
+    let currentType = 'line';
+
+    function renderChart(type) {
+        if (!chart) return;
+        const baseOpt = getBaseOption();
+        const series = getSeriesByType(type);
+        const finalOpt = {
+            ...baseOpt,
+            series: [series]
+        };
+        if (type === 'bar') {
+            finalOpt.grid = { ...baseOpt.grid, bottom: '8%', top: '12%' };
+            finalOpt.xAxis.axisLabel.rotate = 30;
+        } else {
+            finalOpt.grid = { ...baseOpt.grid, bottom: '8%', top: '12%' };
+            finalOpt.xAxis.axisLabel.rotate = 35;
+        }
+        chart.setOption(finalOpt, { notMerge: false });
+    }
+
+    function bindEvents() {
+        const lineBtn = document.getElementById('lineBtn');
+        const barBtn = document.getElementById('barBtn');
+        lineBtn.addEventListener('click', () => {
+            if (currentType === 'line') return;
+            currentType = 'line';
+            renderChart('line');
+            lineBtn.classList.add('active');
+            barBtn.classList.remove('active');
+        });
+        barBtn.addEventListener('click', () => {
+            if (currentType === 'bar') return;
+            currentType = 'bar';
+            renderChart('bar');
+            barBtn.classList.add('active');
+            lineBtn.classList.remove('active');
+        });
+    }
+
+    function handleResize() {
+        if (chart) chart.resize();
+    }
+
+    function init() {
+        renderStatsCards();
+        const dom = document.getElementById('gdpChart');
+        chart = echarts.init(dom);
+        renderChart('line');
+        bindEvents();
+        window.addEventListener('resize', handleResize);
+        console.log(`图表已加载 | 荆州区GDP: ${firstGDP}亿 → ${latestGDP}亿 | CAGR: ${cagrFormatted}%`);
+    }
+
+    window.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
